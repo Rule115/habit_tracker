@@ -19,5 +19,5 @@ export async function middleware(req: NextRequest) {
 
 // Konfigurasi path mana saja yang dilindungi middleware ini
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };
