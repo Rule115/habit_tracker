@@ -1,7 +1,22 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
+import { type DefaultSession } from "next-auth";
 import { db } from "~/server/db";
+
+/**
+ * Module augmentation untuk next-auth. Menambahkan `id` ke Session.user
+ * supaya seluruh aplikasi dapat mengaksesnya secara type-safe.
+ *
+ * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
+ */
+declare module "next-auth" {
+  interface Session extends DefaultSession {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
