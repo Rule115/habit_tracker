@@ -15,16 +15,33 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
+model Habit {
+    id        String    @id @default(cuid())
     name      String
+    frequency String
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    checkIns  CheckIn[]
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@unique([userId, name])
+    @@index([userId])
+    @@index([createdAt])
+}
+
+model CheckIn {
+    id        String   @id @default(cuid())
+    habitId   String
+    habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+    date      DateTime @db.Date
+    note      String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
+    @@unique([habitId, date])
+    @@index([habitId])
+    @@index([date])
 }
 
 // Necessary for Next auth
@@ -56,14 +73,17 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?   // <-- TAMBAHKAN BARIS INI
+  accounts      Account[]
+  sessions      Session[]
+  habits        Habit[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model VerificationToken {
