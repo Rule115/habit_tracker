@@ -1,29 +1,74 @@
-# Create T3 App
+# Habit Tracker
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Aplikasi pelacakan kebiasaan harian. Daftar, login, catat kebiasaan Anda, dan jaga streak harian agar tetap konsisten.
 
-## What's next? How do I make an app with this?
+## Fitur MVP
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Registrasi & login (NextAuth + Credentials + bcrypt)
+- Halaman dashboard terlindungi (hanya bisa diakses saat login)
+- Pelacakan kebiasaan per hari (coming soon di minggu 4+)
+- Perhitungan streak otomatis (logika sudah ada + teruji unit)
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Stack
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **Frontend:** Next.js 15 (App Router) + TypeScript + Tailwind CSS
+- **Backend:** Next API routes + tRPC
+- **Database:** PostgreSQL + Prisma ORM
+- **Auth:** NextAuth (Auth.js) — Credentials provider + bcrypt
+- **Testing:** Vitest + @vitest/coverage-v8
+- **Deploy:** Vercel
 
-## Learn More
+## Memulai (Development)
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+```bash
+# 1. Install dependency
+npm install
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+# 2. Salin env
+cp .env.example .env
+# Lalu isi AUTH_SECRET (jalankan: npx auth secret) dan DATABASE_URL Anda
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+# 3. Siapkan database
+npm run db:generate   # prisma migrate dev
 
-## How do I deploy this?
+# 4. Jalankan
+npm run dev
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+Buka `http://localhost:3000`.
+
+## Testing
+
+```bash
+npm run test            # suite sekali
+npm run test:watch      # watch mode
+npm run test:coverage   # suite + coverage report (target ≥80% di src/lib/)
+```
+
+> **Catatan:** test membaca `.env.test` (lihat `.env.example` untuk format).
+> Pastikan `DATABASE_URL` di `.env.test` menunjuk ke database **test**, bukan dev/produksi.
+
+## Struktur Proyek
+
+```
+src/
+├── app/                # Halaman (App Router)
+│   ├── api/register/   # REST endpoint registrasi
+│   ├── dashboard/      # Halaman terlindungi
+│   ├── login/          # Form login
+│   └── register/       # Form registrasi
+├── lib/                # Logika bisnis murni (streak, dll) + unit test
+├── server/
+│   ├── api/            # tRPC routers (habits, dll)
+│   ├── auth.ts         # Konfigurasi NextAuth (Credentials + bcrypt)
+│   └── db.ts           # Prisma client
+└── middleware.ts       # Lindungi /dashboard, redirect ke /login
+prisma/
+└── schema.prisma       # Skema database
+plans/                  # Rencana fitur (format OKF)
+context.md              # Sumber kebenaran proyek (baca AI tiap minggu)
+```
+
+## Dokumentasi Konteks
+
+Lihat `context.md` — file ini adalah sumber kebenaran yang dirujuk AI saat mengembangkan proyek. Diperbarui setiap minggu.
