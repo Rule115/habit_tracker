@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
 import { redirect } from "next/navigation";
 
@@ -14,6 +15,14 @@ export default async function DashboardPage() {
       <p className="mt-4">
         Selamat datang, <span className="font-semibold">{session.user.email}</span>!
       </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href="/admin/habits"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Kelola Habits →
+        </Link>
+      </div>
     </main>
   );
 }
