@@ -256,10 +256,11 @@ Batas MVP: web only, tanpa reminder/push notification.
   4. `npm run test:coverage` — sistem imun Minggu 2.
   5. `npm audit --audit-level=high` — SCA dependency.
   6. `SKIP_ENV_VALIDATION=true npm run build` — build (skip env validation karena runner tidak punya secret asli).
-- **Branch protection `main`** (atur di GitHub UI: Settings → Branches → Add rule):
-  - Require status check: `gate` lulus.
-  - Require branches up-to-date.
-  - Require pull request review ≥ 1.
+- **Branch protection `main`** (**SUDAH DIAKTIFKAN** via `gh api`, 2026-08-05):
+  - Require status check: `gate` lulus (wajib).
+  - Require branches up-to-date (`strict: true`).
+  - Require pull request (0 approving review untuk solo dev; tim sebaiknya 1+).
+  - Require linear history, no force-push, no deletions.
 
 ### 5 Kerentanan Vibe-Coded (audit mandiri, status: LULUS)
 | # | Kerentanan | Status habit_tracker | Bukti |
