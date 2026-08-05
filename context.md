@@ -234,6 +234,48 @@ Batas MVP: web only, tanpa reminder/push notification.
 - Test DB sebaiknya terpisah dari DB dev/produksi (`DATABASE_URL` di `.env.test`).
 - Riwayat git sudah diverifikasi bersih dari secret (cek: `git log --all -S "<token>"`).
 
+## Security & CI (Minggu 5 — pengerahan)
+
+> Framework **SHIELD** diterapkan pada setiap PR. CI adalah penjaga kelab malam — tidak ada yang merge ke `main` kecuali semua gerbang hijau.
+
+### Pemindai & Pemeriksaan
+| Pemindai | Tujuan | Cara Jalankan |
+|---|---|---|
+| `npm audit --audit-level=high` | SCA — CVE dependency critical/high | `npm audit` lokal; otomatis di CI |
+| `gitleaks detect --source .` | Pemindai secret di riwayat git | `gitleaks detect --source .` (terpasang via WinGet) |
+| ESLint + `tsc --noEmit` | SAST dasar — gaya + type safety | `npm run lint` & `npm run typecheck` |
+| Vitest coverage | Sistem imun (target ≥80% di `src/lib/`) | `npm run test:coverage` |
+
+### Pipeline CI/CD
+- **Lokasi workflow:** `.github/workflows/ci.yml`.
+- **Trigger:** `pull_request` dan `push` ke `main`.
+- **Job `gate`** (Ubuntu + Node 20) menjalankan berurutan:
+  1. `npm ci` — install deterministik dari lockfile.
+  2. `npm run lint` — SAST dasar.
+  3. `npm run typecheck` — TypeScript menangkap metode halusinasi AI.
+  4. `npm run test:coverage` — sistem imun Minggu 2.
+  5. `npm audit --audit-level=high` — SCA dependency.
+  6. `SKIP_ENV_VALIDATION=true npm run build` — build (skip env validation karena runner tidak punya secret asli).
+- **Branch protection `main`** (atur di GitHub UI: Settings → Branches → Add rule):
+  - Require status check: `gate` lulus.
+  - Require branches up-to-date.
+  - Require pull request review ≥ 1.
+
+### 5 Kerentanan Vibe-Coded (audit mandiri, status: LULUS)
+| # | Kerentanan | Status habit_tracker | Bukti |
+|---|---|---|---|
+| 1 | Missing Authorization | ✅ Lulus | Semua procedure `habits.*` = `protectedProcedure`; `register` satu-satunya endpoint publik (by design). |
+| 2 | Secret Hardcode | ✅ Lulus | `.env*` di `.gitignore`; gitleaks `no leaks found` (22 commit, 2.03 MB); 0 secret di riwayat. |
+| 3 | JWT Lemah | ✅ Lulus | Pakai NextAuth v5 (battle-tested, tolak `alg: none`); tidak ada JWT kustom. |
+| 4 | IDOR | ✅ Lulus | `assertHabitOwnership()` cek `habit.userId === session.user.id` sebelum update/delete/checkIn; lempar `FORBIDDEN`. |
+| 5 | Eval/RCE | ✅ Lulus | Grep `eval(`, `new Function(`, `dangerouslySetInnerHTML` = kosong di `src/`. |
+
+### Rotasi Secret (bila bocor)
+1. Anggap secret yang pernah di-commit **publik selamanya**.
+2. Rotasi (ganti) segera: `AUTH_SECRET` via `npx auth secret`; `DATABASE_URL` di dashboard provider DB.
+3. Hapus dari riwayat: `git filter-repo` atau BFG (proyek muda: cukup rotasi + pindah ke `.env`).
+4. Re-run `gitleaks detect` untuk konfirmasi bersih.
+
 ## Riwayat Pembaruan Dokumen
 
 - **Minggu 0:** Buat context.md (Purpose, Stack dasar).
@@ -241,3 +283,4 @@ Batas MVP: web only, tanpa reminder/push notification.
 - **Minggu 2:** Tambah bagian Testing.
 - **Minggu 3:** Tambah Auth + Arsitektur + Catatan Keamanan.
 - **Minggu 4:** Lengkapi 9 bagian (Directory Structure, ENV vars, API Surface, Conventions terpusat, Stack dengan versi spesifik) + tambah `habits.list/create/update/delete` ke API Surface setelah bangun admin panel.
+- **Minggu 5:** Tambah bagian **Security & CI** (Framework SHIELD, tabel pemindai, pipeline GitHub Actions `gate`, branch protection, audit 5 kerentanan, prosedur rotasi secret).
